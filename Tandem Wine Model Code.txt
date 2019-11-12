@@ -1,0 +1,289 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+from warnings import simplefilter
+# ignore all future warnings
+simplefilter(action='ignore', category=FutureWarning)
+
+
+def Percentages_Countries(int):
+    percentages = []
+    for land in list(df['country'].unique()):
+        if len(percentages) < 3:
+            p = round((df['quality'][df['country']==land].value_counts()[i]/df['quality'][df['country']==land].value_counts().sum())*100, 3)
+            print(land,"against quality: ", p)
+            percentages.append(p)
+        else:
+            break
+    return percentages
+
+
+def Countries_BG(list):         
+    plt.bar(0, percentages[0])
+    plt.bar(1, percentages[1])
+    plt.bar(2, percentages[2])
+    plt.xticks((0,1,2), ('UK', 'Italy', 'Spain'))
+    plt.xlabel('Country')
+    plt.ylabel('Percentage')
+    plt.title(f'Percentage of wines of quality {i}')
+    plt.show()
+
+
+df = pd.read_csv('winequality-red-mod.csv')
+
+df.info()
+df.head()
+
+
+# removing the irrelevant columns
+cols_to_drop = ["id"]
+df = df.drop(columns=cols_to_drop,axis=1)
+
+
+
+# separating numerical and non numerical columns
+numerical_columns = [col for col in df.columns 
+                     if (df[col].dtype == 'int64' or 
+                        df[col].dtype == 'float64') and col != 'quality']
+
+print(numerical_columns)
+
+
+# detecting outliers
+# cheeky. there's a few outliers here
+# using method of looking at averages
+df[numerical_columns].describe().loc[['min', 'max', 'mean', '50%'],:]
+
+
+z = df[numerical_columns].max()
+
+np.where(df == z)
+
+
+y = df[numerical_columns].min()
+
+np.where(df == y)
+
+
+# 283 is clearly an outlier, so we drop it to clean the dataset
+df = df.drop([283], axis = 0)
+
+
+b = df['flavonoids'].max()
+np.where(df == b)
+
+
+df = df.drop([151], axis = 0)
+
+
+b = df['total sulfur dioxide'].max()
+
+np.where(df == b)
+
+
+df.loc[1080]
+
+df = df.drop([1081], axis=0)
+
+
+
+b = df['total sulfur dioxide'].max()
+
+np.where(df == b)
+df.iloc[1080]
+
+
+df = df.drop([1083], axis=0)
+
+b = df['density'].max()
+
+np.where(df == b)
+
+
+df.iloc[1419]
+
+
+df = df.drop([1423],axis=0)
+
+
+b = df['chlorides'].max()
+
+np.where(df == b)
+
+
+df.iloc[105]
+
+
+# numerous data points with the exact same chlorides to 3dp. highly 
+# unlikely, so removing
+
+df = df.drop([34],axis=0)
+df = df.drop([258],axis=0)
+df = df.drop([289],axis=0)
+df = df.drop([291],axis=0)
+df = df.drop([546],axis=0)
+df = df.drop([592],axis=0)
+df = df.drop([106],axis=0)
+
+
+np.where(df == df['free sulfur dioxide'].max())
+
+
+df.iloc[1238]
+df = df.drop([221],axis=0)
+df = df.drop([315],axis=0)
+df = df.drop([374],axis=0)
+df = df.drop([447],axis=0)
+df = df.drop([700],axis=0)
+df = df.drop([735],axis=0)
+df = df.drop([937],axis=0)
+df = df.drop([938],axis=0)
+df = df.drop([977],axis=0)
+df = df.drop([978],axis=0)
+df = df.drop([1249],axis=0)
+df = df.drop([86], axis=0)
+
+
+# scatter plots for each numerical column in regards to quality
+for i in df[numerical_columns]:
+    n = 3
+    while n < 9:
+        plt.figure()
+        plt.scatter(x=range(len(list(df[i][df['quality']>n]))),y=df[i][df['quality']>n],s=1)
+        plt.ylabel(i)
+        plt.xlabel(f'quality {n}')
+        n += 1
+
+
+
+
+# histograms for each numerical column
+for i in df[numerical_columns]:
+    plt.figure()
+    plt.hist(df[i], bins = 200)
+    plt.xlabel(i)
+    plt.ylabel('frequency')
+
+
+
+
+
+# seeing if country has an effect on quality
+
+
+i = 3
+while i < 9:
+    percentages = Percentages_Countries(i)
+    Countries_BG(percentages)
+    i+=1
+
+# Spain has the most 7's & 8's
+# Italy has the least 3's & 4's
+# UK only good at having the most 3's
+
+
+
+# removing dummy columns (one of the country columns, as it's not needed to determine the country)
+df = pd.get_dummies(df)
+df = df.drop(columns = ['country_UK'],axis=1)
+
+# now the data is cleaned, we save it to a new csv file
+df.to_csv('clean_data.csv')
+
+df_clean = pd.read_csv('clean_data.csv')
+# df_clean.info()
+
+
+
+print('SVC Model and results: ')
+# separating the independent and dependant variables
+feat = df_clean.drop(columns = ['quality'], axis=1)
+label = df_clean['quality']
+# feat.head()
+
+# splitting the data into train, test and validation sets
+# 70% training, 30% test
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(feat, label, test_size=0.3)
+
+from sklearn.preprocessing import StandardScaler
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+
+from sklearn.svm import SVC
+support_vector_classifier = SVC(kernel='rbf')
+support_vector_classifier.fit(X_train, y_train)
+y_pred_svc = support_vector_classifier.predict(X_test)
+
+from sklearn.metrics import confusion_matrix
+
+cm_support_vector_classifier = confusion_matrix(y_test, y_pred_svc)
+# print(cm_support_vector_classifier, end ='\n\n')
+
+
+
+# accuracy based on quality number
+
+i = 0 # max = 5
+while i < 6:
+    numerator = cm_support_vector_classifier[0][0]+cm_support_vector_classifier[i][i]
+    denominator = sum(cm_support_vector_classifier[0])+sum(cm_support_vector_classifier[i])
+
+    acc_svc = (numerator/denominator)*100
+
+    print('accuracy of quality rating: ', i+3 , round(acc_svc, 3), '%')
+    i+=1
+
+
+
+from sklearn.model_selection import cross_val_score
+
+cross_val_svc = cross_val_score(estimator = SVC(kernel = 'rbf'), X=X_train, y = y_train, cv =5, n_jobs = -1)
+
+print('Cross Validation Accuracy: ', round(cross_val_svc.mean()*100, 2),'%')
+
+
+
+print('\nXGB Model and results: ')
+
+# doing an XGBoost model too...
+
+from xgboost import XGBClassifier
+
+xgb_classifier = XGBClassifier()
+xgb_classifier.fit(X_train, y_train)
+y_pred_xgb = xgb_classifier.predict(X_test)
+
+
+
+# confusion matrix
+
+cm_xgb_classifier = confusion_matrix(y_test, y_pred_xgb)
+# print(cm_xgb_classifier, end = '\n\n')
+
+
+
+i = 0 # max = 5 (quality 3->8)
+while i < 6:
+    numerator = cm_xgb_classifier[0][0]+cm_xgb_classifier[i][i]
+    denominator = sum(cm_xgb_classifier[0])+sum(cm_xgb_classifier[i])
+
+    acc_svc = (numerator/denominator)*100
+
+    print('accuracy of quality rating: ', i+3 , round(acc_svc, 3), '%')
+    i+=1
+
+
+cross_val_xgb = cross_val_score(estimator = XGBClassifier(), X=X_train, y=y_train, cv=5, n_jobs=-1)
+print('Cross Validation Accuracy: ', round(cross_val_xgb.mean()*100, 2),'%')
+
+
+# XGBoost bit more accurate than the support vector method!
+print('\n XG Boost model is slightly more accurate! \n \n')
+
+print('From the data in this set being roughly 60-65% accurate at best, and with a little bit of research online, I can \n confidently say that the correlation between wine attributes does not always have \n an effect on wine quality. \n')
+print("Whilst there is correlation, it's not exceedingly evident in the results which are the most important and when or how they have an effect on quality. \n")
+print('Please see articles: \n https://www.theguardian.com/lifeandstyle/2013/jun/23/wine-tasting-junk-science-analysis \n https://www.economist.com/graphic-detail/2017/05/17/think-wine-connoisseurship-is-nonsense-blind-tasting-data-suggest-otherwise')
