@@ -1,0 +1,52 @@
+# predicting whether an individual is likely to have a stroke based on various factors such as where they live, whether they've smoked, what kind of occupation they have, various health factors and age.
+
+# please find dataset at this link https://drive.google.com/file/d/1iDqhBs1JwEpub56nL6npcDfKnkvxZRM9/view?usp=sharing
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+df = pd.read_csv('stroke_data.csv')
+#df_test = pd.read_csv('stroke_test.csv')
+
+df = df.dropna()
+
+df = pd.get_dummies(df)
+
+df = df.drop(columns= 'id',axis=1)
+df = df.drop(columns= 'gender_Other',axis=1)
+df = df.drop(columns= 'ever_married_No',axis=1)
+df = df.drop(columns= 'work_type_children',axis=1)
+df = df.drop(columns= 'Residence_type_Rural',axis=1)
+df = df.drop(columns= 'smoking_status_never smoked',axis=1)
+
+cm = df.corr()['stroke']
+cm
+
+feat = df.drop(columns = ['stroke'], axis=1)
+label = df['stroke']
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(feat, label, test_size=0.3)
+
+from sklearn.svm import SVC
+support_vector_classifier = SVC(kernel='rbf', gamma = 'auto')
+support_vector_classifier.fit(X_train, y_train)
+y_pred_svc = support_vector_classifier.predict(X_test)
+
+from sklearn.metrics import confusion_matrix
+
+cm_support_vector_classifier = confusion_matrix(y_test, y_pred_svc)
+
+numerator = cm_support_vector_classifier[0][0]+cm_support_vector_classifier[1][1]
+denominator = sum(cm_support_vector_classifier[0])+sum(cm_support_vector_classifier[1])
+acc_svc = (numerator/denominator)*100
+
+print('accuracy: ', round(acc_svc, 3), '%')
+
+from sklearn.model_selection import cross_val_score
+
+cross_val_svc = cross_val_score(estimator = SVC(kernel = 'rbf'), X=X_train, y = y_train, cv =5, n_jobs = -1)
+
+print('Cross Validation Accuracy: ', round(cross_val_svc.mean()*100, 2),'%')

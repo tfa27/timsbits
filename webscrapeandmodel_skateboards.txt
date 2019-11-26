@@ -1,0 +1,71 @@
+# webscraping skateboard attributes (brand, width) and predicting price
+
+from bs4 import BeautifulSoup as soup
+from urllib.request import urlopen as uReq
+import re
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+import sklearn
+from sklearn.linear_model import LinearRegression
+
+filename = 'Skateboards.csv'
+f = open(filename, 'w')
+headers = 'description,brand,price,width\n'
+f.write(headers)
+
+i = 1
+n = 0
+while i < 33:
+    myurl = 'https://www.nativeskatestore.co.uk/skateboards-c7/skateboard-decks-c23#page'+str(i)
+    uClient = uReq(myurl)
+    pagehtml = uClient.read()
+    uClient.close()
+    pagesoup = soup(pagehtml, 'html.parser')
+    products = pagesoup.findAll('div', {'class': 'product__details__title'})
+    while n < 48:
+        txt = products[n].text
+        txt = txt[2:]
+        ind_desc = txt.find('\n')
+        brand = txt[:ind_desc]
+        txt = txt[ind_desc+1:]
+        txt = txt.replace('\n', '')
+        desc = txt
+        width = desc[-32:]
+        width = re.sub("[^0-9.]", "", str(width))
+        prices = pagesoup.findAll('div', {'class':'product__options'})
+        price = prices[n]
+        rrp = price.span.span.text
+        rrp = rrp[2:]
+        ind_price = rrp.find('£')
+        rrp = rrp[:ind_price]
+        f.write(str(desc) + ',' + str(brand) + ',' + str(rrp) + ',' + str(width) + '\n')
+        n += 1
+    i += 1
+    n=0
+f.close()
+
+df = pd.read_csv('Skateboards.csv')
+
+df = df.drop(columns = 'description', axis = 1)
+df = pd.get_dummies(df)
+df = df.drop(columns = 'brand_                   Primitive Skateboarding', axis=1)
+df = df.sample(frac = 1, random_state=1)
+
+feat = df.drop(columns = 'price',axis=1)
+label = df['price']
+
+cm = df.corr()['price']
+cm
+
+LinReg = LinearRegression(normalize = True)
+
+LinReg.fit(feat,label)
+print(LinReg.score(feat,label))
+
+# not too much of an evident relationship here between price, width and brand. It doesn’t help that the price range between brands, even though some are more expensive, is minimal (£54.99 -> £89.99). This lead to a prediction score of 0.56 at best. However, this was more intended as a web scraping exercise. 
+
+
+

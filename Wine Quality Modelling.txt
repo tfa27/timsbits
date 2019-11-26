@@ -1,0 +1,95 @@
+#for dataset: https://drive.google.com/open?id=1PXpqA0rPmlQfrSLDYZ3RJ4Ho5CUi21Bm
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+from sklearn.metrics import confusion_matrix 
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv('winequality-red-mod.csv')
+
+df = df.drop(columns = 'id', axis = 1)
+
+df = pd.get_dummies(df)
+
+df = df.drop(columns = 'country_UK', axis = 1)
+
+df = df.drop([151], axis = 0)
+df = df.drop([1081], axis=0)
+df = df.drop([1083], axis=0)
+df = df.drop([1423],axis=0)
+df = df.drop([34],axis=0)
+df = df.drop([258],axis=0)
+df = df.drop([289],axis=0)
+df = df.drop([291],axis=0)
+df = df.drop([546],axis=0)
+df = df.drop([592],axis=0)
+df = df.drop([106],axis=0)
+df = df.drop([221],axis=0)
+df = df.drop([315],axis=0)
+df = df.drop([374],axis=0)
+df = df.drop([447],axis=0)
+df = df.drop([700],axis=0)
+df = df.drop([735],axis=0)
+df = df.drop([937],axis=0)
+df = df.drop([938],axis=0)
+df = df.drop([977],axis=0)
+df = df.drop([978],axis=0)
+df = df.drop([1249],axis=0)
+df = df.drop([86], axis=0)
+
+df = df.sample(frac=1, replace = True, random_state = 1)
+
+correlationmatrix = df.corr()['quality']
+correlationmatrix
+
+df = df.dropna()
+
+label = df['quality']
+feat = df.drop(columns = 'quality', axis = 1)
+
+# let's try Naive Bayes Classifier
+
+from sklearn.naive_bayes import GaussianNB 
+gnb = GaussianNB().fit(X_train, y_train) 
+gnb_predictions = gnb.predict(X_test) 
+
+accuracy = gnb.score(X_test, y_test) 
+print(accuracy) 
+
+cm = confusion_matrix(y_test, gnb_predictions) 
+
+#bad, score of 0.5
+
+# let's try a SVM
+
+from sklearn.svm import SVC 
+svm_model_linear = SVC(kernel = 'linear', C = 1).fit(X_train, y_train) 
+svm_predictions = svm_model_linear.predict(X_test) 
+    
+accuracy = svm_model_linear.score(X_test, y_test) 
+
+cm = confusion_matrix(y_test, svm_predictions) 
+
+from sklearn.metrics import accuracy_score
+print(accuracy_score(y_test, svm_predictions))
+
+# bit better, at roughly 0.59, but still could be a lot better overall
+
+# let’s try Decision Trees
+
+X_train, X_test, y_train, y_test = train_test_split(feat, label, random_state = 0)
+
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn import metrics
+
+clf = DecisionTreeClassifier()
+clf = clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+
+print(f'Accuracy: {metrics.accuracy_score(y_test, y_pred)}')
+
+# Decision Tree algorithm is most definitely most appropriate for this model, with the highest score of 0.8.
+
