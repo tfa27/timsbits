@@ -1,9 +1,9 @@
 #  Another question I did for a job a while back. 
-#  Had to take a list of numbers between 0 and 1 million, and count all the missing ones. 
+#  Had to take a list of numbers between 1 and 1 million, and count all the missing ones. 
 
 
 def question_two(list1):
-    ints = list(range(1, 1000001))  # list in the appropriate range
+    ints = list(range(1, 1000000))  # list in the appropriate range
     for i in list1:  # iterate through input list
         if i in ints:  # if statement to handle any duplicates in input list
             ints.remove(i)  # simply remove the element from the list
@@ -29,7 +29,7 @@ def create_list():
     lst = []
     n = 2
     while n < 1001:  # list of 1 thousand integers so there's a higher probability of duplicates than 100
-        lst.append(randint(1, 1000001))
+        lst.append(randint(1, 1000000))
         n += 1
     return lst
 
