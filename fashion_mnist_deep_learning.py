@@ -1,4 +1,5 @@
-#  standard tensorflow image recognition tutorial
+#  standard tensorflow image recognition tutorial with the
+#  fashion_mnist dataset from keras
 
 from tensorflow import keras
 import numpy as np
