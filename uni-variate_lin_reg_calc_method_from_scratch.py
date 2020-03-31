@@ -89,7 +89,6 @@ plt.plot(features_train, hypothesis, color='red')
 plt.show()
 plt.close('all')
 
-#  /Users/timandersson1/Desktop/jupyter files/kc_house_data.csv
-#  ^^^ this is the data set I was using to test the algorithm.
-#  /Users/timandersson1/Desktop/jupyter files/winequality-red-mod.csv
-#  /Users/timandersson1/Desktop/jupyter files/Iris.csv
+#  https://drive.google.com/open?id=1AudFeE7dbUS2nPvUFIuasKgpEtuSdroM
+#  https://drive.google.com/open?id=1_h8NFCJv-jNc4BmjGkPG-tPHEA_HuZLU
+#  ^^^ for testing.
