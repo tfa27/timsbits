@@ -50,8 +50,9 @@ def feature_scaling(f):
         print("nah. ")
     else:
         max_f = max(f)
+        min_f = min(f)
         for i in range(0, len(f)):
-            f[i] /= max_f
+            f[i] /= (max_f - min_f)
         return f
 
 
