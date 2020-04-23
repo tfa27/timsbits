@@ -91,8 +91,6 @@ def logistic_regression(file_path, learning_rate, iterations):
         elif h_test[q, 0] < 0.5:
             y_pred[q, 0] = 0
     accuracy = 0
-    print(y_pred.shape)
-    print(y_test.shape)
     for v in range(h_test.shape[0]):
         if y_pred[v, 0] == y_test[v, 0]:
             accuracy += 1
