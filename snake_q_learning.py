@@ -1,3 +1,4 @@
+#  for the trained agent, please download the 'snake_q_table.csv' file. 
 import turtle
 import random
 import time
@@ -164,7 +165,7 @@ list_possible_states = create_possible_states()
 dim = len(list_possible_states)
 
 # q_table = np.random.uniform(low=-2, high=0, size=(dim, 4))
-q_table = np.loadtxt('q_table_snake.csv', delimiter=',')
+q_table = np.loadtxt('snake_q_table.csv', delimiter=',')
 episodes = 600
 actions_n = 4
 epoch = 5000
@@ -258,5 +259,5 @@ while a < episodes:
     if learning_rate > 0.05:
         learning_rate -= 0.01
     win.win.clear()
-np.savetxt('q_table_snake.csv', q_table, delimiter=',')
+np.savetxt('snake_q_table.csv', q_table, delimiter=',')
 print("Q table saved. Iterations complete. ")
