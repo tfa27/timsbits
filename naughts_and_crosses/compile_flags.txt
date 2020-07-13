@@ -1,0 +1,7 @@
+-I/Library/Developer/CommandLineTools/usr/include/c++/v1
+-I/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include
+-I/Library/Developer/CommandLineTools/usr/include
+-I/usr/include
+-I/System/Library/Frameworks
+-I/Library/Frameworks
+-I/Users/timandersson1/Documents/my_workspace/naughts_and_crosses
